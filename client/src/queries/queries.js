@@ -30,16 +30,13 @@ export const addBookMutation = gql`
 export const getBookDetailsQuery = gql`
   query($id: ID){
     book(id: $id) {
-      id
       name
       genre
-      author{
-        id
+      id
+      author @defer {
         name
-        age
-        books{
+        books @defer {
           name
-          id
         }
       }
     }
