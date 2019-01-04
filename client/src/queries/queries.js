@@ -33,9 +33,9 @@ export const getBookDetailsQuery = gql`
       name
       genre
       id
-      author @defer {
+      author {
         name
-        books @defer {
+        books {
           name
         }
       }
