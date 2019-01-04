@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 import { graphql, compose } from 'react-apollo'
 import { getAuthorsQuery, addBookMutation, getBookQuery } from '../queries/queries'
+import isEmpty from 'lodash/isEmpty'
+import { REST_APIS } from '../consts'
+
+import {
+  getAuthors
+} from '../rest-apis'
+
 
 class AddBook extends Component {
 
@@ -9,22 +16,45 @@ class AddBook extends Component {
     this.state = {
       bookName: '',
       genre: '',
-      authorId: ''
+      authorId: '',
+      authors: []
+    }
+  }
+
+  componentDidMount() {
+    if (REST_APIS) {
+      getAuthors().then((authors) => {
+        this.setState({authors})
+      })
     }
   }
 
   renderAuthors = () => {
-    const data = this.props.getAuthorsQuery;
-    if (data.loading) {
+    if (!REST_APIS) {
+      const data = this.props.getAuthorsQuery;
+      if (data.loading) {
+        return (
+          <option disabled>Loading Authors...</option>
+        )
+      }
       return (
-        <option disabled>Loading Authors...</option>
+        data.authors.map((author) => (
+          <option key={author.id} value={author.id}>{author.name}</option>
+        ))
+      )
+    } else {
+      const data = this.state.authors;
+      if (isEmpty(data)) {
+        return (
+          <option disabled>Loading Authors...</option>
+        )
+      }
+      return (
+        data.map((author) => (
+          <option key={author._id} value={author.id}>{author.name}</option>
+        ))
       )
     }
-    return (
-      data.authors.map((author) => (
-        <option key={author.id} value={author.id}>{author.name}</option>
-      ))
-    )
   }
 
   handleSubmit = (e) => {
@@ -63,6 +93,8 @@ class AddBook extends Component {
     );
   }
 }
+
+// export default AddBook
 
 export default compose(
   graphql(getAuthorsQuery, {name: 'getAuthorsQuery'}),
